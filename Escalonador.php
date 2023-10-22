@@ -50,10 +50,6 @@ class Escalonador {
         while(!empty($this->pronto) || !empty($this->bloqueado)){
                 
             $this->decrementaBloqueados();
-
-                if(empty($this->pronto))
-                    $this->debug(PHP_EOL . ">>>>>>>>>>>>>>>>>FILA DE PRONTO VAZIA");
-
             
             if(!empty($this->pronto)) {
                 $this->executando = array_shift($this->pronto);
@@ -76,16 +72,12 @@ class Escalonador {
 
                 // Só volta pra fila de pronto se não estiver bloqueado e ainda estiver no BCP
                 if (empty($this->bloqueado[$this->executando->id]) && !empty($this->BCP[$this->executando->id])) {
-                    $this->debug("VOLTA PRA FILA DE PRONTO: " . $this->executando->nome);
                     array_push($this->pronto, $this->executando);
                 }
                 
                 $this->trocas++;
             }
         }
-
-        $this->debug(PHP_EOL . "RESULTADO");
-        $this->debug(PHP_EOL . "########################" . PHP_EOL);
         
         $this->log("MEDIA DE TROCAS: " . $this->trocas / 10);
         $this->log("MEDIA DE INSTRUCOES: " . $this->instrucoes / $this->trocas);
@@ -98,8 +90,6 @@ class Escalonador {
 
         $this->pc++;
         $this->instrucoes++;
-     
-        $this->debug("LEU -> " . $instr);
 
         //Verifica qual o tipo de instrução a partir do primeiro caracter
         // Se for X ou Y é instrução de armazenamento
@@ -156,8 +146,6 @@ class Escalonador {
     //Decrementa o tempo de espera de todos os bloqueados
     public function decrementaBloqueados(){
         foreach($this->bloqueado as $id => $p) {
-            
-            $this->debug(PHP_EOL . $p->nome . " bloqueado e esperando: " . $this->bloqueado[$id]->espera);
 
             // Libera o bloqueado para a fila de pronto caso espera seja zero
             if ($this->bloqueado[$id]->espera == 0) {
@@ -171,8 +159,6 @@ class Escalonador {
 
                 //Processo Desbloqueado é adicionado a fila de pronto
                 array_push($this->pronto, $desbloqueado);
-
-                $this->debug("DESBLOQUEANDO " . $desbloqueado->nome . " = volta pra fila de pronto");
 
                 continue;
             }
@@ -205,13 +191,7 @@ class Escalonador {
 
     public function log($linha)
     {
-        // file_put_contents("log" . ($this->quantum < 10 ? '0' : '') . $this->quantum . '.txt', $linha, FILE_APPEND);
-        echo $linha . PHP_EOL;
-    }
-
-    public function debug($linha)
-    {
-        echo $linha . PHP_EOL;
+        file_put_contents("logs/log" . ($this->quantum < 10 ? '0' : '') . $this->quantum . '.txt', $linha . PHP_EOL, FILE_APPEND);
     }
 
 
